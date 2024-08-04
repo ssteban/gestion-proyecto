@@ -209,7 +209,7 @@ def actualizar_contraseña_en_bd(email, nueva_contraseña):
         # Actualizar la contraseña en la base de datos
         cursor.execute("UPDATE usuarios SET contraseña = %s WHERE correo = %s", (hashed_password, email))
         conn.commit()
-        
+
         conn.close()
         return True
     except Exception as e:
@@ -262,9 +262,10 @@ def obtener_proyectos():
         conn = sql.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
         
+        # Seleccionar proyectos en orden descendente por fecha de registro
         cursor.execute("SELECT * FROM proyectos")
         proyectos = cursor.fetchall()
-        
+        print("proyectos: ",proyectos)
         conn.close()
         return jsonify(success=True, proyectos=proyectos)
     except Exception as e:
@@ -279,6 +280,8 @@ def detallesProyecto(id):
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM proyectos WHERE id = %s", (id,))
         proyecto = cursor.fetchone()
+        cursor.execute("SELECT * FROM documento WHERE id_proyecto = %s", (id,))
+        documento=cursor.fetchone()
         conn.close()
 
         if proyecto:
@@ -294,20 +297,36 @@ def detallesProyecto(id):
                 'estudiantes': proyecto[8],
                 'docente': proyecto[9],
                 'registrado': proyecto[10],
-                'fecha': proyecto[11] 
+                'fecha': proyecto[11]
             }
-            print(proyecto_dict['registrado'])
-            # Intentar convertir la fecha a datetime si es una cadena válida
-            try:
-                if isinstance(proyecto_dict['fecha'], str):
-                    proyecto_dict['fecha'] = datetime.strptime(proyecto_dict['fecha'], '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
-                elif isinstance(proyecto_dict['fecha'], datetime):
-                    proyecto_dict['fecha'] = proyecto_dict['fecha'].strftime('%Y-%m-%d %H:%M:%S')
-            except ValueError:
-                # Manejar el caso donde la fecha no es válida
-                proyecto_dict['fecha'] = 'Fecha inválida'
+            if documento:
+                doc={
+                    'titulo': documento[2],
+                    'archivo': documento[3]
+                }
 
-            return jsonify(success=True, proyecto=proyecto_dict)
+                try:
+                    if isinstance(proyecto_dict['fecha'], str):
+                        proyecto_dict['fecha'] = datetime.strptime(proyecto_dict['fecha'], '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
+                    elif isinstance(proyecto_dict['fecha'], datetime):
+                        proyecto_dict['fecha'] = proyecto_dict['fecha'].strftime('%Y-%m-%d %H:%M:%S')
+                except ValueError:
+                    # Manejar el caso donde la fecha no es válida
+                    proyecto_dict['fecha'] = 'Fecha inválida'
+
+                return jsonify(success=True, proyecto=proyecto_dict, doc=doc)
+
+            else:
+                # Intentar convertir la fecha a datetime si es una cadena válida
+                try:
+                    if isinstance(proyecto_dict['fecha'], str):
+                        proyecto_dict['fecha'] = datetime.strptime(proyecto_dict['fecha'], '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
+                    elif isinstance(proyecto_dict['fecha'], datetime):
+                        proyecto_dict['fecha'] = proyecto_dict['fecha'].strftime('%Y-%m-%d %H:%M:%S')
+                except ValueError:
+                    # Manejar el caso donde la fecha no es válida
+                    proyecto_dict['fecha'] = 'Fecha inválida'
+                return jsonify(success=True, proyecto=proyecto_dict)
         else:
             return jsonify(success=False, message="Proyecto no encontrado"), 404
 
@@ -543,19 +562,35 @@ def montarfoto(foto, correo):
         return jsonify(success=False, message="Error al actualizar la foto de perfil: " + str(e)), 500
 
 
-def obtenerusuario():
+def obtenerusuario(nombre):
     try:
         conn = sql.connect(**DB_CONFIG)
-        cursor = conn.cursor(dictionary=True)
-        
-        cursor.execute("SELECT * FROM usuarios")
+        cursor = conn.cursor()
+
+        if nombre:
+            cursor.execute("SELECT id, nombre, correo, programa, usuario, fecha FROM usuarios WHERE nombre LIKE %s", ('%' + nombre + '%',))
+        else:
+            cursor.execute("SELECT id, nombre, correo, programa, usuario, fecha FROM usuarios")
+
         usuarios = cursor.fetchall()
-        
         conn.close()
-        return jsonify(success=True, usuarios=usuarios)
+
+        usuarios_list = []
+        for usuario in usuarios:
+            usuarios_list.append({
+                'id': usuario[0],
+                'nombre': usuario[1],
+                'correo': usuario[2],
+                'programa': usuario[3],
+                'usuario': usuario[4],
+                'fecha': usuario[5]
+            })
+
+        return jsonify({'success': True, 'usuarios': usuarios_list})
     except Exception as e:
         print("Error al obtener usuarios:", e)
         return jsonify(success=False, message="Error al obtener usuarios.", error=str(e))
+    
 
 def datallesuser(id):
     try:
@@ -576,7 +611,6 @@ def datallesuser(id):
                 'fecha': datos[7]
 
             }
-            print(usuario)
             return jsonify(success=True, usuario=usuario)
         else:
             return jsonify(success=False, message="Usuario no Encontrado"), 404
@@ -590,31 +624,66 @@ def montardocumento(datos):
     try:
         conn = sql.connect(**DB_CONFIG)
         cursor = conn.cursor()
-              
+        
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS documento (
-                id int not null auto_increment, 
-                id_proyecto int not null,
-                titulo varchar(255) not null,
-                archivo longtext not null,
-                fecha timestamp not null default current_timestamp(),
-                primary key(id)
+                id int NOT NULL AUTO_INCREMENT, 
+                id_proyecto int NOT NULL UNIQUE,
+                titulo varchar(255) NOT NULL,
+                archivo longtext NOT NULL,
+                fecha timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+                PRIMARY KEY(id)
             )
-        """)      
+        """)
+        
         cursor.execute("""
             INSERT INTO documento (id_proyecto, titulo, archivo) 
             VALUES (%s, %s, %s)
-        """, datos)   
+            ON DUPLICATE KEY UPDATE 
+                titulo = VALUES(titulo), 
+                archivo = VALUES(archivo),
+                fecha = CURRENT_TIMESTAMP()
+        """, datos)
+        
         conn.commit()
         conn.close()
-        print("Datos insertados correctamente.")
+        print("Datos insertados/actualizados correctamente.")
         return True
     except Exception as e:
-        print("Error al insertar datos:", e)
+        print("Error al insertar/actualizar datos:", e)
         return False
 
 
+def actualizar_user(datos):
+    user_id, nombre, correo, programa, usuario = datos
 
+    try:
+        # Conectar a la base de datos
+        conn = sql.connect(**DB_CONFIG)
+        cursor = conn.cursor()
 
+        # Actualizar el usuario en la base de datos
+        query = '''
+        UPDATE usuarios
+        SET nombre = %s, correo = %s, programa = %s, usuario = %s
+        WHERE id = %s
+        '''
+        cursor.execute(query, (nombre, correo, programa, usuario, user_id))
+        conn.commit()
 
+        # Verificar si la actualización fue exitosa
+        if cursor.rowcount == 0:
+            return jsonify(success=False, message='Usuario no encontrado'), 404
+
+        return jsonify(success=True, message='Usuario actualizado exitosamente')
+
+    except sql.connect.Error as err:
+        return jsonify(success=False, message=str(err)), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+def registrar_usuario_a(datos):
+    pass
 

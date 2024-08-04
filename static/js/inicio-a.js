@@ -100,6 +100,17 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
+
+    // document.getElementById("registrar-usuarios").addEventListener("click", function(event) {
+    //     event.preventDefault();
+    //     loadContent('registro_u_a.html', function() {
+    //         loadScript('/static/js/registro_u_a.js', function() {
+    //             console.log('Script de registro_u_a.js cargado y ejecutado.');
+    //         });
+    //     });
+    // });
+
+
     document.getElementById("cerrar-sesion").addEventListener("click", function(event) {
         event.preventDefault();
                 if (confirm("¿Seguro que desea cerrar sesión?")) {
@@ -166,36 +177,5 @@ function checkLogin(){
         return true
     }
 }
-
-
-function obtener_informacion() {
-    const correoUsuario = JSON.parse(localStorage.getItem('loggedInUser'));
-    console.log('Correo Usuario:', correoUsuario.user); // Verificar el valor del correo
-    fetch(ruta + '/datos-u', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ correo: correoUsuario.user })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al obtener los datos del estudiante');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Actualizar la imagen de perfil
-        if (data.datos.foto) {
-            document.getElementById('img_user').src = 'data:image/png;base64,' + data.datos.foto;
-        }
-    })
-    .catch(error => {
-        loadingModal.style.display = 'none';
-        console.error('Error al obtener los datos del estudiante:', error);
-    });
-}
-
-//para admin
 
 

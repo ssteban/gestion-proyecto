@@ -7,8 +7,15 @@
     <title>Ver Proyectos</title>
 </head>
 <body>
-    <div class="contenedor-proyectos">
+    
 
+    <div class="contenedor-proyectos">
+        <div class="busqueda-container">
+            <label for="nombre-proyecto">Nombre del Proyecto:</label>
+            <input type="text" id="nombre-proyecto" placeholder="Buscar por nombre...">
+            <button onclick="buscar()">Buscar</button>
+        </div>
+        
         <div class="filtro">
             <label for="facultad">Facultad:</label>
                 <select id="facultad" name="facultad" onchange=mostrarProgramas() required>

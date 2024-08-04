@@ -60,14 +60,6 @@ function inicializarVerProyectos() {
             };
             botonesDiv.appendChild(verButton);
     
-            // const subirButton = document.createElement("button");
-            // subirButton.innerText = "Subir Documento";
-            // subirButton.className = "upload-btn";
-            // subirButton.onclick = function() {
-            //     mostrarSubirDocumento(proyecto.id);
-            // };
-            // botonesDiv.appendChild(subirButton);
-    
             proyectoDiv.appendChild(botonesDiv);
             listaProyectos.appendChild(proyectoDiv);
         });
@@ -115,7 +107,7 @@ function inicializarVerProyectos() {
             if (!data.success) {
                 throw new Error(data.message || 'Datos del proyecto no disponibles');
             }
-
+    
             const modal = document.getElementById("modal");
             const modalContent = document.getElementById("modal-content");
             modalContent.innerHTML = "";
@@ -133,7 +125,7 @@ function inicializarVerProyectos() {
                 { label: "Registrado Por", value: data.proyecto.registrado },
                 { label: "Fecha De Registro", value: data.proyecto.fecha }
             ];
-
+    
             fields.forEach(field => {
                 const label = document.createElement("label");
                 label.innerText = `${field.label}:`;
@@ -144,7 +136,29 @@ function inicializarVerProyectos() {
                 modalContent.appendChild(input);
                 modalContent.appendChild(document.createElement("br"));
             });
-
+    
+            // Convertir base64 a Blob y crear un enlace para el documento
+            if (data.doc && data.doc.archivo) {
+                const byteCharacters = atob(data.doc.archivo);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'application/pdf' }); // Cambia el tipo MIME si es necesario
+    
+                const downloadLink = document.createElement("a");
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = data.doc.titulo;
+                downloadLink.innerText = "Ver Documento";
+                downloadLink.className = "ver-documento-btn";
+                downloadLink.style.display = "inline-block";
+                downloadLink.target = "_blank"; // Abre en una nueva pestaña
+    
+                modalContent.appendChild(downloadLink);
+                modalContent.appendChild(document.createElement("br"));
+            }
+    
             // Botón para subir documento
             const uploadButton = document.createElement("button");
             uploadButton.innerText = "Subir Documento";
@@ -153,7 +167,7 @@ function inicializarVerProyectos() {
                 mostrarSubidaDocumento(id);
             };
             modalContent.appendChild(uploadButton);
-
+    
             // Botón para cerrar el modal
             const cerrarButton = document.createElement("button");
             cerrarButton.innerText = "Cerrar";
@@ -173,7 +187,7 @@ function inicializarVerProyectos() {
             console.error('Error al obtener detalles del proyecto:', error.message);
             alert('Hubo un problema al obtener los detalles del proyecto: ' + error.message);
         });
-    }
+    }    
 
     function mostrarSubidaDocumento(proyectoId) {
         const modalContent = document.getElementById("modal-content");

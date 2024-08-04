@@ -18,9 +18,15 @@ h2 {
 }
 
 .proyecto {
-    padding: 10px;
-    margin: 10px 0;
-    border-bottom: 1px solid #ccc;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 160px; /* Fijar una altura para las tarjetas de proyecto */
+    overflow: hidden;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .proyecto h3 {
@@ -29,26 +35,9 @@ h2 {
 }
 
 .proyecto p {
+    flex-grow: 1;
     margin: 5px 0;
     color: #555;
-}
-
-/* Estilos para los proyectos */
-.proyecto {
-    border: 1px solid #ccc;
-    padding: 20px;
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 160px; /* Fijar una altura para las tarjetas de proyecto */
-    overflow: hidden;
-}
-
-/* Estilos para el resumen */
-.proyecto p {
-    flex-grow: 1;
-    margin-bottom: 20px; /* Espacio para el botón */
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -56,55 +45,42 @@ h2 {
     -webkit-box-orient: vertical;
 }
 
-/* Contenedor para los botones */
 .proyecto .botones {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end; /* Alinear los botones a la derecha */
+    gap: 10px; /* Espacio entre los botones */
 }
 
-/* Estilos para los botones */
 .proyecto button {
     background-color: #007BFF;
     border: none;
-    border-radius: 15px;
+    border-radius: 5px; /* Radio reducido para bordes más suaves */
     color: white;
     font-weight: bold;
-    padding: 10px 20px;
+    padding: 10px 15px; /* Tamaño fijo para los botones */
     cursor: pointer;
-    margin: 0 5px; /* Espacio entre botones */
-    flex: 1; /* Ocupan el mismo espacio */
+    font-size: 16px; /* Tamaño de fuente consistente */
+    transition: background-color 0.3s; /* Transición suave para hover */
 }
 
-/* Cambia el color del botón al pasar el ratón por encima */
 .proyecto button:hover {
     background-color: #0056b3;
 }
 
-/* Botón de subir documento */
 .upload-btn {
     background-color: #4CAF50;
 }
 
-/* Cambia el color del botón de subir documento al pasar el ratón por encima */
 .upload-btn:hover {
     background-color: #45a049;
 }
 
-/* Estilo general para el contenedor de proyectos */
-#lista-proyectos .proyecto {
-    border: 1px solid #ddd;
-    padding: 16px;
-    margin-bottom: 8px;
-}
-
-/* Estilo para el contenedor de paginación */
 #paginacion {
     display: flex;
     justify-content: center;
     margin-top: 16px;
 }
 
-/* Estilo para los botones */
 #paginacion button {
     background-color: #007bff; /* Azul */
     color: white;
@@ -117,12 +93,10 @@ h2 {
     transition: background-color 0.3s;
 }
 
-/* Estilo para el hover de los botones */
 #paginacion button:hover {
     background-color: #0056b3; /* Azul más oscuro */
 }
 
-/* Estilos para el modal */
 .modal {
     display: none; /* Ocultar por defecto */
     position: fixed; /* Mantener fijo en la pantalla */
@@ -135,7 +109,6 @@ h2 {
     background-color: rgba(0, 0, 0, 0.4); /* Fondo negro con opacidad */
 }
 
-/* Estilo para el contenido del modal */
 .modal-content {
     background-color: #fefefe;
     margin: 15% auto; /* Centrar el modal */
@@ -146,18 +119,15 @@ h2 {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra ligera */
 }
 
-/* Estilo para el título del proyecto en el modal */
 .modal-content h2 {
     text-align: center;
     margin-bottom: 10px;
 }
 
-/* Estilo para las secciones de detalles del proyecto en el modal */
 .modal-content p {
     margin: 5px 0;
 }
 
-/* Estilo para el botón de cerrar del modal */
 .modal-content button {
     background-color: #007BFF;
     border: none;
@@ -166,14 +136,13 @@ h2 {
     border-radius: 5px;
     cursor: pointer;
     margin-top: 10px;
+    font-size: 16px; /* Tamaño de fuente consistente */
 }
 
-/* Cambia el color del botón de cerrar al pasar el ratón por encima */
 .modal-content button:hover {
     background-color: #0056b3;
 }
 
-/* Estilos para los inputs en el modal */
 .modal-content input {
     display: block;
     width: 100%; /* Ocupa todo el ancho disponible */
@@ -185,25 +154,21 @@ h2 {
     background-color: transparent; /* Fondo transparente para que se integre mejor */
 }
 
-/* Estilo para los labels de los inputs */
 .modal-content label {
     margin-top: 10px;
     font-weight: bold;
     display: block;
 }
 
-/* Estilo para los inputs en modo lectura */
 .modal-content input[readonly] {
     border-bottom: none; /* Sin línea inferior en modo lectura */
     color: #555; /* Color de texto gris para indicar modo lectura */
 }
 
-/* Estilo para el hover de los inputs */
 .modal-content input:hover {
     background-color: #f0f0f0; /* Cambio de color al pasar el ratón por encima */
 }
 
-/* Estilos para el área de subida de documentos */
 #upload-document {
     margin-top: 20px;
     padding: 10px;
@@ -224,11 +189,98 @@ h2 {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
 }
 
-/* Estilos para el contenedor de botones */
-.proyecto .botones {
+#upload-button:hover {
+    background-color: #45a049;
+}
+
+/* Estilo para el botón de ver documento */
+.ver-documento-btn {
+    background-color: #007BFF;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.ver-documento-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo para el campo de búsqueda */
+#nombre-proyecto {
+    width: calc(100% - 120px); /* Ajusta el ancho para que se ajuste bien con el botón de búsqueda */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-right: 10px; /* Espacio entre el campo de búsqueda y el botón */
+}
+
+/* Estilo para el botón de búsqueda */
+.contenedor-proyectos button {
+    background-color: #007BFF;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Cambia el color del botón de búsqueda al pasar el ratón por encima */
+.contenedor-proyectos button:hover {
+    background-color: #0056b3;
+}
+
+.busqueda-container {
     display: flex;
-    justify-content: flex-end; /* Alinear los botones a la derecha */
-    gap: 10px; /* Espacio entre los botones */
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.busqueda-container input {
+    margin-right: 10px; /* Espacio entre el campo de búsqueda y el botón */
+}
+
+.busqueda-container button {
+    background-color: #007BFF;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.busqueda-container button:hover {
+    background-color: #0056b3;
+}
+
+input[type="text"],
+input[type="email"] {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+    font-size: 16px;
 }

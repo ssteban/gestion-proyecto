@@ -1,3 +1,15 @@
+var ruta = 'http://127.0.0.1:5000';
+
+document.getElementById("buscar-boton").addEventListener("click", function() {
+    const nombre = document.getElementById("buscar-nombre").value;
+    console.log(nombre)
+    if (nombre) {
+        obtenerUsuarios(1, nombre);
+    } else {
+        obtenerUsuarios();
+    }
+});
+
 function mostrarProyectos(usuarios, pagina) {
     const listaUsuarios = document.getElementById("lista-proyectos");
     listaUsuarios.innerHTML = "";
@@ -74,42 +86,106 @@ function mostrarDetallesUsuario(id) {
         const modalContent = document.getElementById("modal-content");
         modalContent.innerHTML = "";
 
-        const id = document.createElement("h2");
-        id.innerText = "ID: " + data.usuario.id;
-        modalContent.appendChild(id);
+        const form = document.createElement("form");
+        form.id = "editar-usuario-form";
 
-        const nombre = document.createElement("p");
-        nombre.innerText = "Nombre: " + data.usuario.nombre;
-        modalContent.appendChild(nombre);
+        const idInput = document.createElement("input");
+        idInput.type = "hidden";
+        idInput.name = "id";
+        idInput.value = data.usuario.id;
+        form.appendChild(idInput);
 
-        const correo = document.createElement("p");
-        correo.innerText = "Correo: " + data.usuario.correo;
-        modalContent.appendChild(correo);
+        const nombreLabel = document.createElement("label");
+        nombreLabel.innerText = "Nombre: ";
+        form.appendChild(nombreLabel);
 
-        const programa = document.createElement("p");
-        programa.innerText = "Programa: " + data.usuario.programa;
-        modalContent.appendChild(programa);
+        const nombreInput = document.createElement("input");
+        nombreInput.type = "text";
+        nombreInput.name = "nombre";
+        nombreInput.value = data.usuario.nombre;
+        form.appendChild(nombreInput);
 
-        const usuario = document.createElement("p");
-        usuario.innerText = "Usuario: " + data.usuario.usuario;
-        modalContent.appendChild(usuario);
+        form.appendChild(document.createElement("br"));
 
-        const fecha = document.createElement("p");
-        fecha.innerText = "Fecha de registro: " + data.usuario.fecha;
-        modalContent.appendChild(fecha);
+        const correoLabel = document.createElement("label");
+        correoLabel.innerText = "Correo: ";
+        form.appendChild(correoLabel);
+
+        const correoInput = document.createElement("input");
+        correoInput.type = "email";
+        correoInput.name = "correo";
+        correoInput.value = data.usuario.correo;
+        form.appendChild(correoInput);
+
+        form.appendChild(document.createElement("br"));
+
+        const programaLabel = document.createElement("label");
+        programaLabel.innerText = "Programa: ";
+        form.appendChild(programaLabel);
+
+        const programaInput = document.createElement("input");
+        programaInput.type = "text";
+        programaInput.name = "programa";
+        programaInput.value = data.usuario.programa;
+        form.appendChild(programaInput);
+
+        form.appendChild(document.createElement("br"));
+
+        const usuarioLabel = document.createElement("label");
+        usuarioLabel.innerText = "Usuario: ";
+        form.appendChild(usuarioLabel);
+
+        const usuarioInput = document.createElement("input");
+        usuarioInput.type = "text";
+        usuarioInput.name = "usuario";
+        usuarioInput.value = data.usuario.usuario;
+        form.appendChild(usuarioInput);
+
+        form.appendChild(document.createElement("br"));
+
+        const fechaLabel = document.createElement("label");
+        fechaLabel.innerText = "Fecha de registro: ";
+        form.appendChild(fechaLabel);
+
+        const fechaInput = document.createElement("input");
+        fechaInput.type = "text";
+        fechaInput.name = "fecha";
+        fechaInput.value = data.usuario.fecha;
+        fechaInput.readOnly = true;
+        form.appendChild(fechaInput);
+
+        form.appendChild(document.createElement("br"));
+
+        const actualizarButton = document.createElement("button");
+        actualizarButton.type = "button";
+        actualizarButton.innerText = "Actualizar";
+        actualizarButton.className = "paginacion-btn";
+        actualizarButton.onclick = function() {
+            actualizarUsuario();
+        };
+        form.appendChild(actualizarButton);
+
+        const cambiarContraseñaButton = document.createElement("button");
+        cambiarContraseñaButton.type = "button";
+        cambiarContraseñaButton.innerText = "Cambiar Contraseña";
+        cambiarContraseñaButton.className = "paginacion-btn";
+        cambiarContraseñaButton.onclick = function() {
+            cambiarContraseña(data.usuario.correo);
+        };
+        form.appendChild(cambiarContraseñaButton);
 
         const cerrarButton = document.createElement("button");
+        cerrarButton.type = "button";
         cerrarButton.innerText = "Cerrar";
         cerrarButton.className = "paginacion-btn";
         cerrarButton.onclick = function() {
             modal.style.display = "none";
         };
-        modalContent.appendChild(cerrarButton);
+        form.appendChild(cerrarButton);
 
-        // Mostrar el modal
+        modalContent.appendChild(form);
         modal.style.display = "block";
 
-        // Desplazarse hacia la parte superior de la página
         window.scrollTo({ top: 0, behavior: 'smooth' });
     })
     .catch(error => {
@@ -118,18 +194,82 @@ function mostrarDetallesUsuario(id) {
     });
 }
 
-function obtenerUsuarios(pagina = 1) {
+function cambiarContraseña(correo) {
+    fetch(ruta + '/send-mail', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ correo: correo })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al enviar el correo de cambio de contraseña');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Correo de cambio de contraseña enviado exitosamente');
+        } else {
+            alert('Error al enviar el correo de cambio de contraseña: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error al enviar el correo de cambio de contraseña:', error);
+        alert('Hubo un problema al enviar el correo de cambio de contraseña.');
+    });
+}
+
+function actualizarUsuario() {
+    const form = document.getElementById("editar-usuario-form");
+    const formData = new FormData(form);
+    const usuarioData = {};
+
+    formData.forEach((value, key) => {
+        usuarioData[key] = value;
+    });
+
+    fetch(ruta + '/actualizar_usuario', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(usuarioData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al actualizar el usuario');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Usuario actualizado exitosamente');
+            document.getElementById("modal").style.display = "none";
+            obtenerUsuarios();
+        } else {
+            alert('Error al actualizar usuario: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error al actualizar usuario:', error);
+        alert('Hubo un problema al actualizar el usuario.');
+    });
+}
+
+function obtenerUsuarios(pagina = 1, nombre = "") {
     fetch(ruta + '/ver_usuarios', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ nombre: nombre })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             mostrarProyectos(data.usuarios, pagina);
-            // Desplazarse hacia la parte superior de la página
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
             alert('Error al obtener usuarios: ' + data.message);

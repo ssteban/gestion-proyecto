@@ -186,7 +186,6 @@ def obtener():
         facultad=data.get('facultad')
         programa=data.get('programa')
         estado=data.get('estado')
-        print(facultad, programa, estado)
         return obtener_proyectos(facultad, programa, estado)
     except Exception as e:
         print(e)
@@ -211,8 +210,9 @@ def fotoP():
 
 @app.route('/ver_usuarios', methods=['POST'])
 def ver_usuarios():
-    return obtenerusuario()
-
+    data = request.get_json()
+    nombre = data.get('nombre', '')
+    return obtenerusuario(nombre)
 
 @app.route('/usuario', methods=['POST'])
 def usuario():
@@ -234,11 +234,30 @@ def obtenerdocumento():
     else:
         return jsonify(success=False, message='lo sentimos no se pudo montar el documento. intentelo mas tarde')
 
+@app.route('/actualizar_usuario', methods=['POST'])
+def actualizar_usuario():
+    data = request.json
+    user_id = data.get('id')
+    nombre = data.get('nombre')
+    correo = data.get('correo')
+    programa = data.get('programa')
+    usuario = data.get('usuario')
+    datos=user_id, nombre, correo, programa, usuario
+    if not (user_id and nombre and correo and programa and usuario):
+        return jsonify(success=False, message='Datos incompletos'), 400
+    return actualizar_user(datos)
+
+@app.route('/register_user', methods=['POST'])
+def registrar_usuario():
+    data=request.get_json()
+    nombre=data.get('nombre')
+    correo=data.get('email')
+    programa=data.get('progra')
+    datos=nombre, correo, programa
+    registrar_usuario_a(datos)
 
 
-
-
-
+    
 
 
 
