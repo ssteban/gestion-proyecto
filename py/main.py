@@ -2,19 +2,22 @@ import mysql.connector as sql
 from flask import session, jsonify
 import bcrypt
 from datetime import datetime
-import secrets
 import string
 import random
 #enviar correo
 from email.message import EmailMessage
 import smtplib
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DB_CONFIG = {
-    'host': 'be3e6usteto9qeznpfib-mysql.services.clever-cloud.com',
-    'database': 'be3e6usteto9qeznpfib',
-    'user': 'uaubqipe9uapmd2z',
-    'password': 'gWHf9tNMojmlIM5bCytI',
-    'port': 3306
+    'host': os.getenv('DB_HOST'),
+    'database': os.getenv('DB_NAME'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'port': os.getenv('DB_PORT', 3306)
 }
 
 #crear base de datos

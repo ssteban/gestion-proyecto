@@ -5,7 +5,8 @@ import bcrypt
 from datetime import timedelta
 
 app = Flask(__name__)
-app.secret_key = 'secret-key'
+app.secret_key = os.getenv('SECRET_KEY')
+
 #app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=2)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 #login usuario
